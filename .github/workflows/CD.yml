@@ -1,0 +1,35 @@
+name: CD.yml
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            binary_name: desktop2proxy
+            artifact_name: linux-binary
+          - os: windows-latest
+            binary_name: desktop2proxy.exe
+            artifact_name: windows-binary
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Build binary
+        run: make
+
+      - name: Upload to GitHub Actions artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ./${{ matrix.binary_name }}
+          retention-days: 7
